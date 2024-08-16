@@ -333,7 +333,6 @@ class Predictor(object):
         
         sparsity, fidelity, contrastivity = [], [], []
         self.pdb2cam = {}
-        count = 0
         for go_indx in self.goidx2chains:
             count += 1
             pred_chains = list(self.goidx2chains[go_indx])
@@ -354,10 +353,10 @@ class Predictor(object):
                 original_prediction = self.Y_hat[0][go_indx]
                 perturbed_prediction = self.Y_hat[0][go_indx] * np.random.uniform(0.9, 1.1)
                 fidelity.append(self.calc_fidelity(heatmap, original_prediction, perturbed_prediction))
-                self.heatmap = heatmap
-                if count != 1:
-                    contrastivity.append(self.calc_contrastivity(heatmap, self.heatmap))
-        print (sparsity)
+                if prev_heatmap is not None:
+                    contrastivity.append(self.calc_contrastivity(prev_heatmap, heatmap))
+            prev_heatmap = heatmap
+        #print (sparsity)
         self.to_csv(sparsity, 'GradCAM_sparsity.csv')
         self.to_csv(fidelity, 'GradCAM_fidelity.csv')
         self.to_csv(contrastivity, 'GradCAM_contrastivity.csv')
